@@ -40,12 +40,20 @@ class CCBanner: UIControl, CCDrawable {
 
     var dataSource: CCBannerDataSource? {
         didSet {
+            cachedImages = nil
             reloadBanner()
         }
     }
     
     var imageInsets: UIEdgeInsets = .zero
-    var images: [CCBannerImage?]?
+    var images: [CCBannerImage?]? {
+        didSet {
+            if dataSource == nil {
+                cachedImages = nil
+                reloadBanner()
+            }
+        }
+    }
     
     var isCircle: Bool = true {
         didSet {
@@ -166,17 +174,41 @@ class CCBanner: UIControl, CCDrawable {
         originalOffset = isCircle ? 1 : 0
     }()
     
+    private var cachedImages: [CCBannerImage?]!
+
     private func reloadBanner() {
-        if isCircle {
-            let prev = (currentIndex + numberOfImages - 1) % numberOfImages
-            let next = (currentIndex + 1) % numberOfImages
-            
-            zip(imageViews, [prev, currentIndex, next]).forEach { (imageView, index) in
-                guard let image = imageAtIndex(index) else { return }
-                if case let .memory(localImage) = image {
-                    imageView.image = localImage
-                }
-            }
+        if cachedImages == nil {
+            cachedImages = (0..<numberOfImages).map { imageAtIndex($0) }
+        }
+        
+        struct Item {
+            var viewIndex: Int
+            var imageIndex: Int
+        }
+        
+        var items = [Item]()
+
+        if !isCircle && currentIndex == 0 {
+            items = [
+                Item(viewIndex: 0, imageIndex: currentIndex),
+                Item(viewIndex: 1, imageIndex: (currentIndex + 1) % numberOfImages)
+            ]
+        } else if !isCircle && currentIndex == numberOfImages - 1 {
+            items = [
+                Item(viewIndex: 1, imageIndex: (currentIndex - 1 + numberOfImages) % numberOfImages),
+                Item(viewIndex: 2, imageIndex: currentIndex)
+            ]
+        } else {
+            items = [
+                Item(viewIndex: 0, imageIndex: (currentIndex + numberOfImages - 1) % numberOfImages),
+                Item(viewIndex: 1, imageIndex: currentIndex),
+                Item(viewIndex: 2, imageIndex: (currentIndex + 1) % numberOfImages),
+            ]
+        }
+        
+        items.filter { cachedImages[$0.imageIndex] is CCBannerImage }
+            .map { (imageViews[$0.viewIndex], cachedImages[$0.imageIndex]!) }
+            .forEach { (imageView, image) in
         }
     }
     
