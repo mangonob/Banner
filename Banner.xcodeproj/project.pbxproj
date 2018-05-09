@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36230AB50A0FBC6003F8E850 /* Pods_Banner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9ECBDE897AD9C4C7C11E8EC /* Pods_Banner.framework */; };
 		4AB2966820A1FE6B00FFEC2E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB2966720A1FE6B00FFEC2E /* AppDelegate.swift */; };
 		4AB2966A20A1FE6B00FFEC2E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB2966920A1FE6B00FFEC2E /* ViewController.swift */; };
 		4AB2966D20A1FE6B00FFEC2E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4AB2966B20A1FE6B00FFEC2E /* Main.storyboard */; };
@@ -24,6 +25,9 @@
 		4AB2967120A1FE6B00FFEC2E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4AB2967320A1FE6B00FFEC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4AB2967920A1FEA000FFEC2E /* CCBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCBanner.swift; sourceTree = "<group>"; };
+		93001EC9FEA194F6687B59C6 /* Pods-Banner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Banner.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Banner/Pods-Banner.debug.xcconfig"; sourceTree = "<group>"; };
+		A9ECBDE897AD9C4C7C11E8EC /* Pods_Banner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Banner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C84876156F14976334C6E269 /* Pods-Banner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Banner.release.xcconfig"; path = "Pods/Target Support Files/Pods-Banner/Pods-Banner.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,17 +35,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36230AB50A0FBC6003F8E850 /* Pods_Banner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2D03C2B84D9C509D97484139 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A9ECBDE897AD9C4C7C11E8EC /* Pods_Banner.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		4AB2965B20A1FE6B00FFEC2E = {
 			isa = PBXGroup;
 			children = (
 				4AB2966620A1FE6B00FFEC2E /* Banner */,
 				4AB2966520A1FE6B00FFEC2E /* Products */,
+				F843AA19C4EDDE5FBF95B172 /* Pods */,
+				2D03C2B84D9C509D97484139 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +82,15 @@
 			path = Banner;
 			sourceTree = "<group>";
 		};
+		F843AA19C4EDDE5FBF95B172 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				93001EC9FEA194F6687B59C6 /* Pods-Banner.debug.xcconfig */,
+				C84876156F14976334C6E269 /* Pods-Banner.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -74,10 +98,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4AB2967620A1FE6B00FFEC2E /* Build configuration list for PBXNativeTarget "Banner" */;
 			buildPhases = (
+				13C6512503B4ECC9E06AAA5E /* [CP] Check Pods Manifest.lock */,
 				4AB2966020A1FE6B00FFEC2E /* Sources */,
 				4AB2966120A1FE6B00FFEC2E /* Frameworks */,
 				4AB2966220A1FE6B00FFEC2E /* Resources */,
 				4A7FE2FE20A29CB6000D1B2E /* Integrate Reveal Server */,
+				B9E20F8DD054632D18873AC5 /* [CP] Embed Pods Frameworks */,
+				E3175429EB5D5F4333B836A0 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -136,6 +163,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		13C6512503B4ECC9E06AAA5E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Banner-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		4A7FE2FE20A29CB6000D1B2E /* Integrate Reveal Server */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -149,6 +194,39 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "REVEAL_APP_PATH=$(mdfind kMDItemCFBundleIdentifier=\"com.ittybittyapps.Reveal2\" | head -n 1)\nBUILD_SCRIPT_PATH=\"${REVEAL_APP_PATH}/Contents/SharedSupport/Scripts/reveal_server_build_phase.sh\"\nif [ \"${REVEAL_APP_PATH}\" -a -e \"${BUILD_SCRIPT_PATH}\" ]; then\n\"${BUILD_SCRIPT_PATH}\"\nelse\necho \"Reveal Server not loaded: Cannot find a compatible Reveal app.\"\nfi";
+		};
+		B9E20F8DD054632D18873AC5 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Banner/Pods-Banner-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Banner/Pods-Banner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E3175429EB5D5F4333B836A0 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Banner/Pods-Banner-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -294,6 +372,7 @@
 		};
 		4AB2967720A1FE6B00FFEC2E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 93001EC9FEA194F6687B59C6 /* Pods-Banner.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -309,6 +388,7 @@
 		};
 		4AB2967820A1FE6B00FFEC2E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C84876156F14976334C6E269 /* Pods-Banner.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
