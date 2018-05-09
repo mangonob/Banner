@@ -7,9 +7,10 @@
 //
 
 import UIKit
+import SDWebImage
 
 
-@objc protocol CCDrawable {
+@objc protocol CCDrawable: NSObjectProtocol {
     @objc optional func drawableView(_ view: UIView, atRect rect: CGRect)
 }
 
@@ -33,8 +34,9 @@ enum CCBannerImage {
 class CCBanner: UIControl, CCDrawable {
     var delegate: CCBannerDelegate? {
         didSet {
-            setNeedsDisplay()
-            cover.drawable = delegate
+            if let respondsDraw = delegate?.responds(to: #selector(CCDrawable.drawableView(_:atRect:))), respondsDraw {
+                cover.drawable = delegate
+            }
         }
     }
 
@@ -79,10 +81,12 @@ class CCBanner: UIControl, CCDrawable {
     var progress: Double = 0 {
         didSet {
             guard progress != oldValue else { return }
-            setNeedsDisplay()
+            cover.setNeedsDisplay()
             
             if progress == -1 || progress == 1 {
                 currentIndex += Int(progress)
+                progress = 0
+                
                 withOutObserving {
                     if isCircle {
                         scrollView.contentOffset.x = bounds.width
@@ -109,6 +113,7 @@ class CCBanner: UIControl, CCDrawable {
     fileprivate lazy var cover: CCBannerCoverView = {
         let cover = CCBannerCoverView()
         cover.backgroundColor = .clear
+        cover.contentMode = .redraw
         addSubview(cover)
         cover.isUserInteractionEnabled = false
         cover.drawable = self
@@ -139,6 +144,7 @@ class CCBanner: UIControl, CCDrawable {
         let scrollView = UIScrollView(frame: bounds)
         insertSubview(scrollView, at: 0)
         scrollView.isPagingEnabled = true
+        scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
@@ -151,11 +157,7 @@ class CCBanner: UIControl, CCDrawable {
 
         return bannerViews
     }()
-    
-    var imageViews: [UIImageView] {
-        return bannerViews.map { $0.imageView }
-    }
-    
+
     private var scrollViewObserving: NSKeyValueObservation!
     
     private var isObserving = true
@@ -175,40 +177,56 @@ class CCBanner: UIControl, CCDrawable {
     }()
     
     private var cachedImages: [CCBannerImage?]!
+    private lazy var imageOperations = [SDWebImageOperation?]()
 
     private func reloadBanner() {
         if cachedImages == nil {
             cachedImages = (0..<numberOfImages).map { imageAtIndex($0) }
         }
-        
         struct Item {
             var viewIndex: Int
-            var imageIndex: Int
+            var dataIndex: Int
         }
         
         var items = [Item]()
 
         if !isCircle && currentIndex == 0 {
             items = [
-                Item(viewIndex: 0, imageIndex: currentIndex),
-                Item(viewIndex: 1, imageIndex: (currentIndex + 1) % numberOfImages)
+                Item(viewIndex: 0, dataIndex: currentIndex),
+                Item(viewIndex: 1, dataIndex: (currentIndex + 1) % numberOfImages)
             ]
         } else if !isCircle && currentIndex == numberOfImages - 1 {
             items = [
-                Item(viewIndex: 1, imageIndex: (currentIndex - 1 + numberOfImages) % numberOfImages),
-                Item(viewIndex: 2, imageIndex: currentIndex)
+                Item(viewIndex: 1, dataIndex: (currentIndex - 1 + numberOfImages) % numberOfImages),
+                Item(viewIndex: 2, dataIndex: currentIndex)
             ]
         } else {
             items = [
-                Item(viewIndex: 0, imageIndex: (currentIndex + numberOfImages - 1) % numberOfImages),
-                Item(viewIndex: 1, imageIndex: currentIndex),
-                Item(viewIndex: 2, imageIndex: (currentIndex + 1) % numberOfImages),
+                Item(viewIndex: 0, dataIndex: (currentIndex + numberOfImages - 1) % numberOfImages),
+                Item(viewIndex: 1, dataIndex: currentIndex),
+                Item(viewIndex: 2, dataIndex: (currentIndex + 1) % numberOfImages),
             ]
         }
         
-        items.filter { cachedImages[$0.imageIndex] is CCBannerImage }
-            .map { (imageViews[$0.viewIndex], cachedImages[$0.imageIndex]!) }
-            .forEach { (imageView, image) in
+        items.map { (bannerViews[$0.viewIndex], drawableAtIndex($0.dataIndex), imageInsetsAtIndex($0.dataIndex), contentModeAtIndex($0.dataIndex), cachedImages[$0.dataIndex], $0) }
+            .forEach { (view, drawable, inset, contentMode, image, item) in
+                view.drawable = drawable
+                view.imageViewInsets = inset
+                view.imageView.contentMode = contentMode
+                
+                if let image = image {
+                    switch image {
+                    case .memory(let image):
+                        view.imageView.image = image
+                    case .network(let url):
+                        let operation = SDWebImageManager.shared().loadImage(with: url, options: [], progress: nil, completed: { [weak self] (image, _, _, _, _, _) in
+                            guard let image = image else { return }
+                            self?.cachedImages[item.dataIndex] = .memory(image)
+                            self?.reloadBanner()
+                        })
+                        imageOperations.append(operation)
+                    }
+                }
         }
     }
     
@@ -222,6 +240,7 @@ class CCBanner: UIControl, CCDrawable {
             _currentIndex = newValue
             sendActions(for: .valueChanged)
             reloadBanner()
+            cover.setNeedsDisplay()
         }
         get {
             return numberOfImages > 0 ? (_currentIndex % numberOfImages + numberOfImages) % numberOfImages : 0
@@ -243,6 +262,7 @@ class CCBanner: UIControl, CCDrawable {
     }
 
     @objc private func tapAction(_ sender: Any) {
+        delegate?.banner?(self, selectedAtIndex: currentIndex)
     }
 
     override init(frame: CGRect) {
@@ -281,15 +301,41 @@ class CCBanner: UIControl, CCDrawable {
         }
     }
 
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-        let drawable: CCDrawable = delegate ?? self
-        drawable.drawableView?(self, atRect: rect)
-    }
-    
     func drawableView(_ view: UIView, atRect rect: CGRect) {
         // Draw anything you want.
-        NSAttributedString(string: "Please draw page indicator for me.").draw(at: .zero)
+        // NSAttributedString(string: "Please draw page indicator for page(\(currentIndex) + \(String(format: "%.2lf", progress))).").draw(at: .zero)
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        
+        context.saveGState()
+        defer { context.restoreGState() }
+        
+        let distance: CGFloat = 20
+        let radius: CGFloat = 4
+        let borderWidth: CGFloat = 2
+        let defaultColor = UIColor.lightGray.withAlphaComponent(0.5)
+        let selectedColor = UIColor.darkGray.withAlphaComponent(0.5)
+        
+        context.translateBy(x: bounds.width / 2, y: bounds.height - 16)
+        context.translateBy(x: -distance * CGFloat(numberOfImages) / 2, y: 0)
+        let path = UIBezierPath(ovalIn: .init(x: -radius, y: -radius, width: radius * 2, height: radius * 2))
+        path.lineWidth = borderWidth * 2
+        
+        defaultColor.setFill()
+        selectedColor.setStroke()
+        
+        for index in 0..<numberOfImages {
+            if index == currentIndex {
+                context.saveGState()
+                if !(currentIndex == 0 && progress < 0 || currentIndex == numberOfImages - 1 && progress > 0) {
+                    context.translateBy(x: CGFloat(progress) * distance, y: 0)
+                }
+                path.addClip()
+                path.stroke()
+                context.restoreGState()
+            }
+            path.fill()
+            context.translateBy(x: distance, y: 0)
+        }
     }
 }
 
@@ -304,6 +350,7 @@ class CCBannerView: UIView {
     fileprivate lazy var cover: CCBannerCoverView = {
         let cover = CCBannerCoverView()
         cover.backgroundColor = UIColor.clear
+        cover.contentMode = .redraw
         cover.isUserInteractionEnabled = false
         addSubview(cover)
         return cover

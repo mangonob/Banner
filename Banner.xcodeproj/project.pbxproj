@@ -102,9 +102,9 @@
 				4AB2966020A1FE6B00FFEC2E /* Sources */,
 				4AB2966120A1FE6B00FFEC2E /* Frameworks */,
 				4AB2966220A1FE6B00FFEC2E /* Resources */,
-				4A7FE2FE20A29CB6000D1B2E /* Integrate Reveal Server */,
 				B9E20F8DD054632D18873AC5 /* [CP] Embed Pods Frameworks */,
 				E3175429EB5D5F4333B836A0 /* [CP] Copy Pods Resources */,
+				4A7FE2FE20A29CB6000D1B2E /* Integrate Reveal Server */,
 			);
 			buildRules = (
 			);

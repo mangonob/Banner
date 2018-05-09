@@ -26,15 +26,21 @@ class ViewController: UIViewController {
 
 
 extension ViewController: CCBannerDelegate {
+    func banner(_ banner: CCBanner, insetOfImageAtIndex index: Int) -> UIEdgeInsets {
+        let margin = CGFloat((index + 1) * 10)
+        return UIEdgeInsets(top: margin, left: margin, bottom: margin, right: margin)
+    }
 }
 
 extension ViewController: CCBannerDataSource {
     func numberOfImages(inBanner banner: CCBanner) -> Int {
-        return 5
+        return 7
     }
     
     func banner(_ banner: CCBanner, imageAtIndex index: Int) -> CCBannerImage? {
         var images = [#imageLiteral(resourceName: "image1"), #imageLiteral(resourceName: "image2"), #imageLiteral(resourceName: "image3"), #imageLiteral(resourceName: "image4"), #imageLiteral(resourceName: "image5")].map({ CCBannerImage.memory($0)})
+        images.append(.network(URL(string: "https://www.baidu.com/img/bd_logo1.png")!))
+        images.insert(.network(URL(string: "https://www.baidu.com/img/bd_logo1.png")!), at: 0)
         return images[index]
     }
 }
