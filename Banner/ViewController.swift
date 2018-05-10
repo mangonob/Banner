@@ -30,6 +30,14 @@ extension ViewController: CCBannerDelegate {
         let margin = CGFloat((index + 1) * 10)
         return UIEdgeInsets(top: margin, left: margin, bottom: margin, right: margin)
     }
+    
+    func banner(_ banner: CCBanner, contentModeAtIndex index: Int) -> UIViewContentMode {
+        return UIViewContentMode.scaleAspectFit
+    }
+    
+    func banner(_ banner: CCBanner, drawableAtIndex index: Int) -> CCDrawable? {
+        return Drawable(index)
+    }
 }
 
 extension ViewController: CCBannerDataSource {
@@ -45,3 +53,19 @@ extension ViewController: CCBannerDataSource {
     }
 }
 
+
+class Drawable: NSObject, CCDrawable {
+    var index: Int
+    
+    init(_ index: Int) {
+        self.index = index
+        super.init()
+    }
+    
+    func drawableView(_ view: UIView, atRect rect: CGRect) {
+        NSAttributedString(string: "\(index)", attributes: [
+            NSAttributedStringKey.font: UIFont.systemFont(ofSize: 42),
+            NSAttributedStringKey.foregroundColor: UIColor.red
+            ]).draw(at: .zero)
+    }
+}
