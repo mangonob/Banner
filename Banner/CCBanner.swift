@@ -359,8 +359,14 @@ class CCBanner: UIControl, CCDrawable {
         defaultColor.setFill()
         selectedColor.setStroke()
         
-        for index in 0..<numberOfImages {
+        context.saveGState()
+        for _ in 0..<numberOfImages {
             path.fill()
+            context.translateBy(x: distance, y: 0)
+        }
+        context.restoreGState()
+        
+        for index in 0..<numberOfImages {
             if index == currentIndex {
                 context.saveGState()
                 if !(currentIndex == 0 && progress < 0 || currentIndex == numberOfImages - 1 && progress > 0) {
@@ -406,6 +412,7 @@ class CCBannerView: UIView {
     
     fileprivate lazy var imageView: UIImageView = {
         let imageView = UIImageView()
+        imageView.clipsToBounds = true
         insertSubview(imageView, at: 0)
         return imageView
     }()
