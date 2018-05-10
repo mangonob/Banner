@@ -62,13 +62,46 @@ class CCBanner: UIControl, CCDrawable {
         }
     }
 
+    private var runningTimer: Timer!
     var isAutoRuning: Bool = true {
         didSet {
+            guard isAutoRuning != oldValue else { return }
+            if isAutoRuning {
+                assert(isCircle, "isAutoRunning only avaliable when banner is circle.")
+                rebuildTimer()
+            } else {
+                destroyTimer()
+            }
         }
     }
     
-    var runningDuration: TimeInterval = 1.5 {
+    private func buildTimer() {
+        runningTimer = Timer(timeInterval: runningDuration, target: self, selector: #selector(self.runningTimerAction(_:)), userInfo: nil, repeats: true)
+        RunLoop.main.add(runningTimer, forMode: .defaultRunLoopMode)
+    }
+    
+    private func rebuildTimer() {
+        destroyTimer()
+        buildTimer()
+    }
+    
+    private func destroyTimer() {
+        runningTimer?.invalidate()
+        runningTimer = nil
+    }
+    
+    @objc private func runningTimerAction(_ sender: Timer) {
+        guard progress == 0 else { return }
+        scrollView.setContentOffset(CGPoint(x: bounds.width * 2, y: 0), animated: true)
+    }
+    
+    var runningDuration: TimeInterval = 3.0 {
         didSet {
+            if runningDuration != oldValue {
+                if isCircle {
+                    rebuildTimer()
+                }
+            }
         }
     }
 
@@ -174,6 +207,7 @@ class CCBanner: UIControl, CCDrawable {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:))))
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset), options: [.new, .old], context: nil)
         originalOffset = isCircle ? 1 : 0
+        buildTimer()
     }()
     
     private var cachedImages: [CCBannerImage?]!
@@ -289,6 +323,7 @@ class CCBanner: UIControl, CCDrawable {
         cover.frame = bounds
 
         scrollView.contentOffset = CGPoint(x: bounds.width * CGFloat(originalOffset), y: 0)
+        progress = 0
     }
     
     private var isBoundsChanging: Bool = false
