@@ -14,8 +14,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        banner.dataSource = self
-        banner.delegate = self
+        var images = [#imageLiteral(resourceName: "image1"), #imageLiteral(resourceName: "image2"), #imageLiteral(resourceName: "image3"), #imageLiteral(resourceName: "image4"), #imageLiteral(resourceName: "image5")].map({ CCBannerImage.memory($0)})
+        images.append(.network(URL(string: "https://www.baidu.com/img/bd_logo1.png")!))
+        images.insert(.network(URL(string: "https://www.baidu.com/img/bd_logo1.png")!), at: 0)
+        banner.images = images
     }
 
     override func didReceiveMemoryWarning() {

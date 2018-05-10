@@ -207,6 +207,7 @@ class CCBanner: UIControl, CCDrawable {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.tapAction(_:))))
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset), options: [.new, .old], context: nil)
         originalOffset = isCircle ? 1 : 0
+        contentMode = .scaleAspectFill
         buildTimer()
     }()
     
@@ -359,6 +360,7 @@ class CCBanner: UIControl, CCDrawable {
         selectedColor.setStroke()
         
         for index in 0..<numberOfImages {
+            path.fill()
             if index == currentIndex {
                 context.saveGState()
                 if !(currentIndex == 0 && progress < 0 || currentIndex == numberOfImages - 1 && progress > 0) {
@@ -368,7 +370,6 @@ class CCBanner: UIControl, CCDrawable {
                 path.stroke()
                 context.restoreGState()
             }
-            path.fill()
             context.translateBy(x: distance, y: 0)
         }
     }
