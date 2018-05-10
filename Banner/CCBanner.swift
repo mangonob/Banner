@@ -39,7 +39,7 @@ class CCBanner: UIControl, CCDrawable {
             }
         }
     }
-
+    
     var dataSource: CCBannerDataSource? {
         didSet {
             cachedImages = nil
@@ -61,7 +61,7 @@ class CCBanner: UIControl, CCDrawable {
         didSet {
         }
     }
-
+    
     private var runningTimer: Timer!
     var isAutoRuning: Bool = true {
         didSet {
@@ -104,7 +104,7 @@ class CCBanner: UIControl, CCDrawable {
             }
         }
     }
-
+    
     private lazy var prepareOnce: Void = {
         currentIndex = 0
     }()
@@ -142,7 +142,7 @@ class CCBanner: UIControl, CCDrawable {
             }
         }
     }
-
+    
     fileprivate lazy var cover: CCBannerCoverView = {
         let cover = CCBannerCoverView()
         cover.backgroundColor = .clear
@@ -152,27 +152,27 @@ class CCBanner: UIControl, CCDrawable {
         cover.drawable = self
         return cover
     }()
-
-    private var numberOfImages: Int {
+    
+    var numberOfImages: Int {
         return dataSource?.numberOfImages(inBanner: self) ?? images?.count ?? 0
     }
     
-    private func imageAtIndex(_ index: Int) -> CCBannerImage? {
+    func imageAtIndex(_ index: Int) -> CCBannerImage? {
         return dataSource?.banner(self, imageAtIndex: index) ?? images?[index]
     }
     
-    private func imageInsetsAtIndex(_ index: Int) -> UIEdgeInsets {
+    func imageInsetsAtIndex(_ index: Int) -> UIEdgeInsets {
         return delegate?.banner?(self, insetOfImageAtIndex: index) ?? imageInsets
     }
     
-    private func drawableAtIndex(_ index: Int) -> CCDrawable? {
+    func drawableAtIndex(_ index: Int) -> CCDrawable? {
         return delegate?.banner?(self, drawableAtIndex: index)
     }
     
-    private func contentModeAtIndex(_ index: Int) -> UIViewContentMode {
+    func contentModeAtIndex(_ index: Int) -> UIViewContentMode {
         return delegate?.banner?(self, contentModeAtIndex: index) ?? contentMode
     }
-
+    
     fileprivate lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView(frame: bounds)
         insertSubview(scrollView, at: 0)
@@ -187,10 +187,10 @@ class CCBanner: UIControl, CCDrawable {
             scrollView.addSubview(banner)
             return banner
         }
-
+        
         return bannerViews
     }()
-
+    
     private var scrollViewObserving: NSKeyValueObservation!
     
     private var isObserving = true
@@ -213,7 +213,7 @@ class CCBanner: UIControl, CCDrawable {
     
     private var cachedImages: [CCBannerImage?]!
     private lazy var imageOperations = [SDWebImageOperation?]()
-
+    
     private func reloadBanner() {
         if cachedImages == nil {
             cachedImages = (0..<numberOfImages).map { imageAtIndex($0) }
@@ -224,7 +224,7 @@ class CCBanner: UIControl, CCDrawable {
         }
         
         var items = [Item]()
-
+        
         if !isCircle && currentIndex == 0 {
             items = [
                 Item(viewIndex: 0, dataIndex: currentIndex),
@@ -281,25 +281,25 @@ class CCBanner: UIControl, CCDrawable {
             return numberOfImages > 0 ? (_currentIndex % numberOfImages + numberOfImages) % numberOfImages : 0
         }
     }
-
+    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard isObserving else { return }
         guard !isBoundsChanging else { return }
         guard numberOfImages > 0 else { return }
-
+        
         guard let contentOffset = change?[NSKeyValueChangeKey.newKey] as? CGPoint else { return }
         guard let oldValue = change?[NSKeyValueChangeKey.oldKey] as? CGPoint else { return }
         guard contentOffset != oldValue else { return }
         var delta = Double((contentOffset.x - bounds.width * CGFloat(originalOffset)) / bounds.width)
         delta = min(max(delta, -1), 1)
-
+        
         progress = delta
     }
-
+    
     @objc private func tapAction(_ sender: Any) {
         delegate?.banner?(self, selectedAtIndex: currentIndex)
     }
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         _ = configureOnce
@@ -314,7 +314,7 @@ class CCBanner: UIControl, CCDrawable {
         super.layoutSubviews()
         isBoundsChanging = true
         defer { isBoundsChanging = false }
-
+        
         scrollView.frame = bounds
         scrollView.contentSize = CGSize(width: bounds.width * 3, height: bounds.height)
         
@@ -322,7 +322,7 @@ class CCBanner: UIControl, CCDrawable {
         bannerViews.forEach { $0.frame = divided.slice; divided = divided.remainder.divided(atDistance: bounds.width, from: .minXEdge) }
         
         cover.frame = bounds
-
+        
         scrollView.contentOffset = CGPoint(x: bounds.width * CGFloat(originalOffset), y: 0)
         progress = 0
     }
@@ -336,7 +336,7 @@ class CCBanner: UIControl, CCDrawable {
             isBoundsChanging = false
         }
     }
-
+    
     func drawableView(_ view: UIView, atRect rect: CGRect) {
         // Draw anything you want.
         // NSAttributedString(string: "Please draw page indicator for page(\(currentIndex) + \(String(format: "%.2lf", progress))).").draw(at: .zero)
@@ -348,11 +348,11 @@ class CCBanner: UIControl, CCDrawable {
         let distance: CGFloat = 20
         let radius: CGFloat = 4
         let borderWidth: CGFloat = 2
-        let defaultColor = UIColor.lightGray.withAlphaComponent(0.5)
-        let selectedColor = UIColor.darkGray.withAlphaComponent(0.5)
+        let defaultColor = UIColor.white.withAlphaComponent(0.5)
+        let selectedColor = UIColor.lightGray
         
         context.translateBy(x: bounds.width / 2, y: bounds.height - 16)
-        context.translateBy(x: -distance * CGFloat(numberOfImages) / 2, y: 0)
+        context.translateBy(x: -distance * CGFloat(numberOfImages - 1) / 2, y: 0)
         let path = UIBezierPath(ovalIn: .init(x: -radius, y: -radius, width: radius * 2, height: radius * 2))
         path.lineWidth = borderWidth * 2
         
@@ -403,7 +403,7 @@ class CCBannerView: UIView {
             imageView.contentMode = contentMode
         }
     }
-
+    
     var imageViewInsets: UIEdgeInsets = .zero {
         didSet {
             layoutSubviews()
@@ -435,7 +435,7 @@ fileprivate class CCBannerCoverView: UIView {
             setNeedsDisplay()
         }
     }
-
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         drawable?.drawableView?(self, atRect: rect)
